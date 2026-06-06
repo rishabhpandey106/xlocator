@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "Twitter Account Location Flag",
-  "version": "1.0.0",
-  "description": "Shows country flag emoji next to Twitter usernames based on account location",
+  "name": "X Locator",
+  "version": "1.1.0",
+  "description": "Shows country flag emoji next to X usernames based on account location",
+  "icons": {
+    "16": "assets/16.png",
+    "24": "assets/24.png",
+    "32": "assets/32.png",
+    "64": "assets/64.png"
+  },
   "permissions": [
     "activeTab",
     "storage",
@@ -10,7 +16,13 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Twitter Location Flag"
+    "default_title": "X Locator",
+    "default_icon": {
+      "16": "assets/16.png",
+      "24": "assets/24.png",
+      "32": "assets/32.png",
+      "64": "assets/64.png"
+    }
   },
   "host_permissions": [
     "https://x.com/*",
@@ -22,13 +34,22 @@
         "https://x.com/*",
         "https://twitter.com/*"
       ],
-      "js": ["countryFlags.js", "cache.js", "api.js", "tooltip.js", "ui.js", "content.js"],
+      "js": [
+        "countryFlags.js",
+        "cache.js",
+        "api.js",
+        "tooltip.js",
+        "ui.js",
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["pageScript.js"],
+      "resources": [
+        "pageScript.js"
+      ],
       "matches": [
         "https://x.com/*",
         "https://twitter.com/*"
@@ -36,4 +57,3 @@
     }
   ]
 }
-
