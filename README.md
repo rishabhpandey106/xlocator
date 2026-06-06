@@ -1,10 +1,10 @@
-# Twitter Account Location Flag Chrome Extension
+# X Locator
 
 A Chrome extension that displays country flag emojis next to Twitter/X usernames based on the account's location information.
 
 ## Fork Attribution
 
-This is a fork of the original work by [Rhys Sullivan](https://github.com/RhysSullivan/twitter-account-location-in-username). The original repository provides the core functionality, while this fork adds significant enhancements to the user interface and user experience.
+This is a fork of the [travofoz](https://github.com/travofoz/twitter-account-location-in-username) who worked on project by [Rhys Sullivan](https://github.com/RhysSullivan/twitter-account-location-in-username). The original repository provides the core functionality, while this fork adds significant enhancements to the user interface and user experience.
 
 ## Enhanced Features
 
@@ -22,7 +22,7 @@ This is a fork of the original work by [Rhys Sullivan](https://github.com/RhysSu
 - **Enhanced Button Styling**: Smooth hover effects and visual feedback
 - **Location Accuracy Indicators**: 
   - 📍 for precise location
-  - ⚠️ for potentially inaccurate location (VPN/Proxy detected)
+  - ⚠️ for potentially inaccurate location (VPN/Proxy detected - now explicitly displayed next to the flag)
 - **Responsive Design**: Better handling of different content lengths
 - **Accessibility**: Proper ARIA labels and keyboard navigation support
 
@@ -32,6 +32,12 @@ This is a fork of the original work by [Rhys Sullivan](https://github.com/RhysSu
 - **Enhanced Verification Badges**: Clear indicators for Blue Verified, Government, and Business accounts
 - **Affiliate Information**: Better presentation of affiliated accounts and organizations
 - **Smooth Animations**: Subtle transitions and micro-interactions throughout
+- **Redesigned Popup UI**: A completely modernized, card-based extension popup interface with inline SVG icons and intuitive settings.
+
+### 🆕 Country Blocklist (Restricted Jurisdictions)
+- **Automatic Content Filtering**: Hide tweets completely based on the user's country.
+- **Multiple Country Support**: Enter a comma-separated list of countries to block (e.g., "Russia, China, North Korea").
+- **Real-Time Updates**: Instantly filters your timeline when the blocklist is updated—no page refresh required!
 
 ## Features
 
@@ -64,6 +70,7 @@ This is a fork of the original work by [Rhys Sullivan](https://github.com/RhysSu
   - 📋 Copy username to clipboard
   - 🔄 Refresh profile information
   - 👤 Open full profile
+- **Block Countries**: Open the extension popup, enter country names in the "Country Blocklist" box, and click Save. Tweets from those countries will instantly disappear.
 - Location indicators show accuracy:
   - 📍 Precise location
   - ⚠️ May be inaccurate (VPN/Proxy detected)
