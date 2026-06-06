@@ -421,6 +421,12 @@ function createFlagElement(screenName, profileData) {
     flagEl.title = 'Location information unavailable';
   }
 
+  const locationAccurate = profileData?.about_profile?.location_accurate;
+  if (locationAccurate === false) {
+    flagEl.innerHTML += ' <span style="font-size: 0.9em; margin-left: 2px;">⚠️</span>';
+    flagEl.title += ' (Location may be inaccurate - VPN/Proxy detected)';
+  }
+
   flagEl.style.display = 'inline';
   flagEl.style.marginLeft = '8px';  // More space between display name and flag
   flagEl.style.marginRight = '2px'; // Less space between flag and username
@@ -456,6 +462,49 @@ function createGlobeElement(screenName) {
 }
 
 /**
+ * Checks if the resolved location matches any blocked country and hides the container if so.
+ * @param {Element} containerEl - The container element
+ * @param {string} location - The raw location string
+ * @returns {boolean} True if the container was hidden
+ */
+function hideContainerIfBlocked(containerEl, location) {
+  if (!location) return false;
+  
+  // Try to get standardized country name
+  let countryToMatch = location.toLowerCase();
+  const flagGetter = (typeof window !== 'undefined' && window.getCountryFlag) ? window.getCountryFlag : (typeof getCountryFlag === 'function' ? getCountryFlag : null);
+  if (flagGetter) {
+    const flag = flagGetter(location);
+    if (flag && flag.country) {
+      countryToMatch = flag.country.toLowerCase();
+    }
+  }
+  
+  // Get blocklist
+  let blockedSet = null;
+  if (typeof window !== 'undefined' && window.getBlockedCountries) {
+    blockedSet = window.getBlockedCountries();
+  }
+  
+  if (!blockedSet || blockedSet.size === 0) return false;
+  
+  let isBlocked = false;
+  for (const blockedCountry of blockedSet) {
+    if (countryToMatch.includes(blockedCountry)) {
+      isBlocked = true;
+      break;
+    }
+  }
+  
+  if (isBlocked) {
+    containerEl.style.display = 'none';
+    console.log(`[UI] Hidden container due to blocked country match: ${countryToMatch}`);
+    return true;
+  }
+  return false;
+}
+
+/**
  * Handles cached flag display for a username
  * @param {Element} containerEl - The container element
  * @param {string} screenName - The Twitter username
@@ -463,6 +512,12 @@ function createGlobeElement(screenName) {
  * @returns {Promise<void>}
  */
 async function handleCachedFlag(containerEl, screenName, profileData) {
+  const location = profileData?.about_profile?.account_based_in || '';
+  if (hideContainerIfBlocked(containerEl, location)) {
+    containerEl.dataset.flagAdded = 'blocked';
+    return;
+  }
+
   const flagEl = createFlagElement(screenName, profileData);
   
   const clickHandler = (e) => {
@@ -511,6 +566,14 @@ async function handleFlagClickToFetch(flagEl, screenName) {
                 (typeof fullProfileCache !== 'undefined' && fullProfileCache.get ? fullProfileCache.get(screenName) : null);
     
     if (full && typeof full === 'object') {
+      const location = full?.about_profile?.account_based_in || '';
+      const containerEl = shimmer.closest('article[data-testid="tweet"], [data-testid="UserCell"]');
+      if (containerEl && hideContainerIfBlocked(containerEl, location)) {
+        containerEl.dataset.flagAdded = 'blocked';
+        shimmer.remove();
+        return;
+      }
+
       const newFlagEl = createFlagElement(screenName, full);
       
       const newClickHandler = (e2) => {
@@ -607,6 +670,13 @@ async function handleGlobeClick(containerEl, screenName) {
                 (typeof fullProfileCache !== 'undefined' && fullProfileCache.get ? fullProfileCache.get(screenName) : null));
 
     if (full && typeof full === 'object') {
+      const location = full?.about_profile?.account_based_in || '';
+      if (hideContainerIfBlocked(containerEl, location)) {
+        containerEl.dataset.flagAdded = 'blocked';
+        shimmer.remove();
+        return;
+      }
+
       const flagEl = createFlagElement(screenName, full);
       
       const flagClickHandler = (e2) => {
@@ -622,19 +692,6 @@ async function handleGlobeClick(containerEl, screenName) {
       } else {
         console.error('[UI] Failed to insert flag after fetch');
         showFetchError(shimmer, 'Error displaying flag', () => handleGlobeClick(containerEl, screenName));
-      }
-      
-      // Show warning if needed
-      if (result?.locationAccurate === false) {
-        const warning = document.createElement('span');
-        warning.textContent = '⚠️';
-        warning.title = 'Location may be inaccurate (VPN/Proxy detected)';
-        warning.style.display = 'inline-block';
-        warning.style.marginLeft = '2px';
-        warning.style.fontSize = '0.9em';
-        warning.style.verticalAlign = 'middle';
-        flagEl.after(warning);
-        console.log(`[UI] Added VPN warning for ${screenName}`);
       }
     } else {
       showFetchError(shimmer, 'Profile fetch failed - click to retry', () => handleGlobeClick(containerEl, screenName));
@@ -775,6 +832,7 @@ try {
   window.handleFlagClickToFetch = handleFlagClickToFetch;
   window.showFetchError = showFetchError;
   window.handleGlobeClick = handleGlobeClick;
+  window.hideContainerIfBlocked = hideContainerIfBlocked;
 } catch (e) {
   // Silently ignore if window is unavailable (content script safety)
 }

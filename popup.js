@@ -13,17 +13,25 @@ const DEFAULT_ENABLED = true;
 const ENABLED_COLOR = '#1d9bf0';
 /** @constant {string} Extension disabled color */
 const DISABLED_COLOR = '#536471';
+/** @constant {string} Storage key for blocked countries */
+const BLOCKED_COUNTRIES_KEY = 'blocked_countries';
 
 // Get elements
 const toggleSwitch = document.getElementById('toggleSwitch');
 const status = document.getElementById('status');
 const cacheSize = document.getElementById('cacheSize');
 const clearCacheBtn = document.getElementById('clearCacheBtn');
+const blockedCountriesInput = document.getElementById('blockedCountries');
+const saveBlocklistBtn = document.getElementById('saveBlocklistBtn');
 
 // Load current state
-chrome.storage.local.get([TOGGLE_KEY], (result) => {
+chrome.storage.local.get([TOGGLE_KEY, BLOCKED_COUNTRIES_KEY], (result) => {
   const isEnabled = result[TOGGLE_KEY] !== undefined ? result[TOGGLE_KEY] : DEFAULT_ENABLED;
   updateToggle(isEnabled);
+  
+  if (result[BLOCKED_COUNTRIES_KEY]) {
+    blockedCountriesInput.value = result[BLOCKED_COUNTRIES_KEY];
+  }
 });
 
 /**
@@ -84,6 +92,36 @@ clearCacheBtn.addEventListener('click', () => {
       });
     });
   }
+});
+
+// Save blocklist button handler
+saveBlocklistBtn.addEventListener('click', () => {
+  const blocklistStr = blockedCountriesInput.value;
+  chrome.storage.local.set({ [BLOCKED_COUNTRIES_KEY]: blocklistStr }, () => {
+    console.log('Blocklist saved:', blocklistStr);
+    
+    // Provide visual feedback
+    const originalText = saveBlocklistBtn.textContent;
+    saveBlocklistBtn.textContent = 'Saved!';
+    saveBlocklistBtn.style.background = '#00ba7c'; // Success green color
+    
+    setTimeout(() => {
+      saveBlocklistBtn.textContent = originalText;
+      saveBlocklistBtn.style.background = '';
+    }, 2000);
+    
+    // Notify content scripts
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        chrome.tabs.sendMessage(tab.id, {
+          type: 'updateBlocklist',
+          blocklist: blocklistStr
+        }).catch(() => {
+          // Tab might not have content script
+        });
+      });
+    });
+  });
 });
 
 /**

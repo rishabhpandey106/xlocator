@@ -10,9 +10,13 @@
 let observer = null;
 /** @type {boolean} */
 let extensionEnabled = true;
+/** @type {Set<string>} */
+let blockedCountriesSet = new Set();
 
 /** @constant {string} Storage key for extension toggle state */
 const TOGGLE_KEY = 'extension_enabled';
+/** @constant {string} Storage key for blocked countries */
+const BLOCKED_COUNTRIES_KEY = 'blocked_countries';
 /** @constant {boolean} Default enabled state */
 const DEFAULT_ENABLED = true;
 /** @constant {number} Debounce delay for username processing in milliseconds */
@@ -46,18 +50,39 @@ function logMetrics() {
 }
 
 /**
- * Loads the extension enabled state from Chrome storage
+ * Loads the extension enabled state and blocklist from Chrome storage
  * @returns {Promise<void>}
  */
 async function loadEnabledState() {
   try {
-    const result = await chrome.storage.local.get([TOGGLE_KEY]);
+    const result = await chrome.storage.local.get([TOGGLE_KEY, BLOCKED_COUNTRIES_KEY]);
     extensionEnabled = result[TOGGLE_KEY] !== undefined ? result[TOGGLE_KEY] : DEFAULT_ENABLED;
     console.log('Extension enabled:', extensionEnabled);
+    
+    if (result[BLOCKED_COUNTRIES_KEY]) {
+      updateBlocklistSet(result[BLOCKED_COUNTRIES_KEY]);
+    }
   } catch (error) {
-    console.error('Error loading enabled state:', error);
+    console.error('Error loading state:', error);
     extensionEnabled = DEFAULT_ENABLED;
   }
+}
+
+/**
+ * Updates the Set of blocked countries from a comma-separated string
+ * @param {string} blocklistStr 
+ */
+function updateBlocklistSet(blocklistStr) {
+  blockedCountriesSet.clear();
+  if (blocklistStr) {
+    blocklistStr.split(',').forEach(country => {
+      const trimmed = country.trim().toLowerCase();
+      if (trimmed) {
+        blockedCountriesSet.add(trimmed);
+      }
+    });
+  }
+  console.log('Updated blocked countries list:', Array.from(blockedCountriesSet));
 }
 
 // Listen for toggle changes from popup
@@ -88,8 +113,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     } catch (e) {
       console.error('Error clearing cache:', e);
     }
+  } else if (request.type === 'updateBlocklist') {
+    updateBlocklistSet(request.blocklist);
+    // Apply blocklist to already processed containers
+    applyBlocklistToExisting();
+    // Reprocess to hide any newly blocked containers
+    processUsernames();
   }
 });
+
+/**
+ * Applies the current blocklist to existing processed containers
+ */
+function applyBlocklistToExisting() {
+  const containers = document.querySelectorAll('[data-flag-added="true"]');
+  containers.forEach(container => {
+    const screenName = extractUsername(container);
+    if (screenName) {
+      const getCached = (typeof window !== 'undefined' && window.getCachedProfileData) ? window.getCachedProfileData : (typeof getCachedProfileData === 'function' ? getCachedProfileData : null);
+      const profileData = getCached ? getCached(screenName) : null;
+      const location = profileData?.about_profile?.account_based_in || '';
+      
+      const hideFunc = (typeof window !== 'undefined' && window.hideContainerIfBlocked) ? window.hideContainerIfBlocked : (typeof hideContainerIfBlocked === 'function' ? hideContainerIfBlocked : null);
+      if (hideFunc && hideFunc(container, location)) {
+        container.dataset.flagAdded = 'blocked';
+        // Remove the flag/globe element since we hid the container
+        const uiElements = container.querySelectorAll('[data-twitter-location-flag], [data-twitter-location-globe]');
+        uiElements.forEach(el => {
+          if (el._clickHandler) {
+            el.removeEventListener('click', el._clickHandler);
+            delete el._clickHandler;
+          }
+          el.remove();
+        });
+      }
+    }
+  });
+}
 
 /**
  * Checks if cached profile data exists for a screen name
@@ -461,6 +521,7 @@ window.addEventListener('beforeunload', cleanupAllResources);
 try {
   window.metrics = metrics;
   window.logMetrics = logMetrics;
+  window.getBlockedCountries = () => blockedCountriesSet;
 } catch (e) {
   // Silently ignore if window is unavailable
 }
