@@ -18,7 +18,7 @@ const BLOCKED_COUNTRIES_KEY = 'blocked_countries';
 
 // Get elements
 const toggleSwitch = document.getElementById('toggleSwitch');
-const status = document.getElementById('status');
+const toggleText = document.getElementById('toggleText');
 const cacheSize = document.getElementById('cacheSize');
 const clearCacheBtn = document.getElementById('clearCacheBtn');
 const blockedCountriesInput = document.getElementById('blockedCountries');
@@ -131,12 +131,10 @@ saveBlocklistBtn.addEventListener('click', () => {
 function updateToggle(isEnabled) {
   if (isEnabled) {
     toggleSwitch.classList.add('enabled');
-    status.textContent = 'Extension is enabled';
-    status.style.color = ENABLED_COLOR;
+    if (toggleText) toggleText.textContent = 'On';
   } else {
     toggleSwitch.classList.remove('enabled');
-    status.textContent = 'Extension is disabled';
-    status.style.color = DISABLED_COLOR;
+    if (toggleText) toggleText.textContent = 'Off';
   }
 }
 

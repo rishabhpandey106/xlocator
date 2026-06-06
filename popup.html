@@ -3,144 +3,303 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    body {
-      width: 250px;
-      padding: 16px;
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      font-size: 14px;
+    :root {
+      --primary: #005eb8;
+      --primary-hover: #004c97;
+      --bg-color: #f5f8fa;
+      --card-bg: #ffffff;
+      --text-dark: #0f1419;
+      --text-gray: #536471;
+      --border: #e1e8ed;
     }
+    body {
+      width: 320px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-dark);
+      box-sizing: border-box;
+    }
+    /* Header */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
     }
-    h1 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .toggle-container {
+    .header-title {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 12px;
-      background: #f7f9f9;
-      border-radius: 8px;
-      margin-bottom: 12px;
+      gap: 8px;
+      color: var(--primary);
+      font-size: 18px;
+      font-weight: 600;
     }
-    .toggle-label {
-      font-weight: 500;
-      color: #0f1419;
-    }
-    .toggle-switch {
-      position: relative;
-      width: 44px;
-      height: 24px;
-      background: #ccd6dd;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .toggle-switch.enabled {
-      background: #1d9bf0;
-    }
-    .toggle-switch::after {
-      content: '';
-      position: absolute;
+    .header-title svg {
       width: 20px;
       height: 20px;
-      border-radius: 50%;
-      background: white;
-      top: 2px;
-      left: 2px;
-      transition: transform 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
-    .toggle-switch.enabled::after {
-      transform: translateX(20px);
-    }
-    .status {
-      font-size: 12px;
-      color: #536471;
-      margin-top: 8px;
-      text-align: center;
-    }
-    .info {
-      font-size: 12px;
-      color: #536471;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #eff3f4;
-    }
-    .cache-section {
-      margin-top: 12px;
-      padding: 12px;
-      background: #f7f9f9;
-      border-radius: 8px;
-    }
-    .cache-info {
-      font-size: 12px;
-      color: #536471;
-      margin-bottom: 8px;
-    }
-    button {
-      width: 100%;
-      padding: 8px 12px;
-      background: #1d9bf0;
-      color: white;
-      border: none;
-      border-radius: 20px;
+    
+    /* Toggle */
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      background: #ccd6dd;
+      border-radius: 16px;
+      padding: 2px;
+      height: 28px;
+      width: 90px;
       cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+      box-sizing: border-box;
+    }
+    .toggle-switch.enabled {
+      background: var(--primary);
+    }
+    .toggle-circle {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      left: 4px;
+      transition: transform 0.3s;
+    }
+    .toggle-switch.enabled .toggle-circle {
+      transform: translateX(62px);
+    }
+    .toggle-text {
+      color: white;
       font-size: 12px;
       font-weight: 600;
+      position: absolute;
+      left: 30px;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toggle-switch:not(.enabled) .toggle-text {
+      color: var(--text-dark);
+      left: 28px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    /* Proxy Card */
+    .proxy-card {
+      background: linear-gradient(135deg, #15202b 0%, #22303c 100%);
+      border: none;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      padding: 16px;
+      height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    /* Subtle grid line effect */
+    .proxy-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 10px 10px;
+      pointer-events: none;
+    }
+    .proxy-icon {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 20px;
+      height: 20px;
+      color: white;
+    }
+    .proxy-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 2px;
+      z-index: 1;
+    }
+    .proxy-location {
+      font-size: 16px;
+      font-weight: 700;
+      z-index: 1;
+    }
+
+    /* Data Cache Card */
+    .cache-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cache-info-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .cache-info-text {
+      font-size: 12px;
+      color: var(--text-gray);
+    }
+    .text-blue {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .btn-outline {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: white;
+      border: 1px solid #ccd6dd;
+      color: var(--text-gray);
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
       transition: background 0.2s;
     }
-    button:hover {
-      background: #1a91da;
+    .btn-outline:hover {
+      background: #f7f9fa;
     }
-    button:active {
-      background: #1881ca;
+    .btn-outline svg {
+      width: 14px;
+      height: 14px;
     }
-    button.danger {
-      background: #e74c3c;
+
+    /* Blocklist Card */
+    .blocklist-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
     }
-    button.danger:hover {
-      background: #c0392b;
+    .blocklist-title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-dark);
+    }
+    .label-small {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-gray);
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+    }
+    textarea {
+      width: 100%;
+      height: 60px;
+      box-sizing: border-box;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #fcfcfc;
+      font-family: inherit;
+      font-size: 12px;
+      resize: none;
+      margin-bottom: 12px;
+      color: var(--text-dark);
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+    }
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+    .btn-primary svg {
+      width: 16px;
+      height: 16px;
     }
   </style>
 </head>
 <body>
+
+  <!-- Header -->
   <div class="header">
-    <h1>Twitter Location Flag</h1>
-  </div>
-  
-  <div class="toggle-container">
-    <span class="toggle-label">Enable Extension</span>
-    <div class="toggle-switch" id="toggleSwitch"></div>
-  </div>
-  
-  <div class="status" id="status">Loading...</div>
-  
-  <div class="info">
-    Shows country flags next to Twitter usernames based on account location.
-  </div>
-
-  <div class="cache-section">
-    <div class="cache-info">
-      Cached profiles: <strong id="cacheSize">--</strong>
+    <div class="header-title">
+      <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      X Locator
     </div>
-    <button id="clearCacheBtn" class="danger">Clear Cache</button>
+    <div class="toggle-switch enabled" id="toggleSwitch">
+      <div class="toggle-circle"></div>
+      <span class="toggle-text" id="toggleText">On</span>
+    </div>
   </div>
 
-  <div class="cache-section" style="margin-top: 12px;">
-    <div class="toggle-label" style="margin-bottom: 8px; display: block;">Blocked Countries</div>
-    <textarea id="blockedCountries" placeholder="e.g. United States, France" style="width: 100%; height: 60px; box-sizing: border-box; padding: 8px; border: 1px solid #ccd6dd; border-radius: 4px; margin-bottom: 8px; font-family: inherit; font-size: 12px; resize: none;"></textarea>
-    <button id="saveBlocklistBtn">Save Blocklist</button>
+  <!-- Active Proxy -->
+  <div class="card proxy-card">
+    <svg class="proxy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line></svg>
+    <div class="proxy-label">ACTIVE PROXY</div>
+    <div class="proxy-location">You can see, block posts from this location</div>
+  </div>
+
+  <!-- Data Cache -->
+  <div class="card cache-card">
+    <div>
+      <div class="cache-info-title">Data Cache</div>
+      <div class="cache-info-text"><strong class="text-blue" id="cacheSize">0</strong> Profiles Cached</div>
+    </div>
+    <button id="clearCacheBtn" class="btn-outline">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+      Clear Cache
+    </button>
+  </div>
+
+  <!-- Country Blocklist -->
+  <div class="card">
+    <div class="blocklist-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+      Country Blocklist
+    </div>
+    <span class="label-small">RESTRICTED JURISDICTIONS</span>
+    <textarea id="blockedCountries" placeholder="e.g. Russia, China, North Korea..."></textarea>
+    <button id="saveBlocklistBtn" class="btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+      Save Blocklist
+    </button>
   </div>
 
   <script src="popup.js"></script>
 </body>
 </html>
-
